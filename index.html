@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Flask Items App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+        }
+        input, button {
+            padding: 8px;
+            margin: 5px 0;
+        }
+        .section {
+            margin-bottom: 30px;
+        }
+        ul {
+            padding-left: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Items Management</h1>
+
+    <div class="section">
+        <h2>All Items</h2>
+        <button onclick="getItems()">Load Items</button>
+        <ul id="itemsList"></ul>
+    </div>
+
+    <div class="section">
+        <h2>Get Item by ID</h2>
+        <input type="number" id="itemId" placeholder="Enter Item ID">
+        <button onclick="getItem()">Get Item</button>
+        <p id="singleItem"></p>
+    </div>
+
+    <div class="section">
+        <h2>Add New Item</h2>
+        <input type="text" id="itemName" placeholder="Enter Item Name">
+        <button onclick="addItem()">Add Item</button>
+        <p id="addMessage"></p>
+    </div>
+
+<script>
+    const baseURL = "http://127.0.0.1:5000";
+
+    // Get all items
+    function getItems() {
+        fetch(`${baseURL}/items`)
+            .then(response => response.json())
+            .then(data => {
+                const list = document.getElementById("itemsList");
+                list.innerHTML = "";
+                data.items.forEach(item => {
+                    const li = document.createElement("li");
+                    li.textContent = `ID: ${item.id} - Name: ${item.name}`;
+                    list.appendChild(li);
+                });
+            });
+    }
+
+    // Get item by ID
+    function getItem() {
+        const id = document.getElementById("itemId").value;
+
+        fetch(`${baseURL}/items/${id}`)
+            .then(response => response.json())
+            .then(data => {
+                const output = document.getElementById("singleItem");
+                if (data.item) {
+                    output.textContent = `ID: ${data.item.id} - Name: ${data.item.name}`;
+                } else {
+                    output.textContent = data.message;
+                }
+            });
+    }
+
+    // Add new item
+    function addItem() {
+        const name = document.getElementById("itemName").value;
+
+        fetch(`${baseURL}/items`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ name: name })
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById("addMessage").textContent = data.message;
+            getItems(); // Refresh list
+        });
+    }
+</script>
+
+</body>
+</html>
